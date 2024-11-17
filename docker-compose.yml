@@ -1,0 +1,27 @@
+version: "3.5"
+
+services:
+
+# Main App
+  rent-collector:
+    build:
+      args:
+        user: dev
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    container_name: rent-collector
+    restart: unless-stopped
+    ports:
+        - "0.0.0.0:8006:80"
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - rent-net
+
+networks:
+    rent-net:
+        name: 'rent-net'
+        driver: bridge
+

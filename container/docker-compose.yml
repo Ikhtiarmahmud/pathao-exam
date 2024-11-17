@@ -1,0 +1,53 @@
+version: '3.8'
+
+# Define named volumes for persistent storage
+volumes:
+  mysql_volume:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: ${MYSQL_VOLUME_PATH}
+
+# Services
+services:
+  pathao-exam:
+    build:
+      args:
+        user: ${DOCKER_USER:-dev}
+        uid: ${DOCKER_UID:-1000}
+      context: ../
+      dockerfile: container/Dockerfile
+    container_name: pathao-exam
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ../:/var/www/html
+    env_file:
+      - .envs/app.env
+      - .envs/.env
+    networks:
+      - app-vault
+    command: >
+      sh -c "php artisan config:cache &&
+             php artisan route:cache &&
+             php-fpm && nginx -g 'daemon off;'"
+
+  nginx:
+    image: nginx:1.23.3
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - '0.0.0.0:${NGINX_PORT:-8011}:80'
+    volumes:
+      - ../:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - pathao-exam
+    networks:
+      - app-vault
+
+# Network configuration
+networks:
+  app-vault:
+    driver: bridge
