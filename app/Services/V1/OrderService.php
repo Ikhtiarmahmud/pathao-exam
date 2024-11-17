@@ -2,6 +2,7 @@
 
 namespace App\Services\V1;
 
+use Illuminate\Support\Facades\Auth;
 use App\Repositories\OrderRepository;
 
 class OrderService
@@ -12,12 +13,14 @@ class OrderService
 
     public function getOrders()
     {
-        return $this->repository->findAll();
+        return $this->repository->findBy(['user_id' => Auth::id()]);
     }
 
     public function store($request)
     {
         $data = $request->all();
+
+        $data['user_id'] = Auth::id();
 
         return $this->repository->create($data);
     }

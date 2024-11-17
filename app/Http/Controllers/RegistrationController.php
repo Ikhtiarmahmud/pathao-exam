@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PasswordLoginRequest;
 use Illuminate\Http\Request;
 use App\Enums\HttpStatusCode;
 use App\Response\ApiResponse;
@@ -14,7 +15,7 @@ class RegistrationController extends Controller
         private readonly RegistrationService $registrationService
     ) {}
 
-    public function login(Request $request): JsonResponse
+    public function login(PasswordLoginRequest $request): JsonResponse
     {
         $data = [
             'email' => $request->input('email'),
@@ -26,7 +27,7 @@ class RegistrationController extends Controller
 
             return ApiResponse::sendSuccessResponse($result, 'Login Successfully');
         } catch (\Exception $e) {
-            return ApiResponse::sendErrorResponse('Login Failed', (array) $e, HttpStatusCode::INTERNAL_ERROR);
+            return ApiResponse::sendErrorResponse('Login Failed',  $e->getMessage(), HttpStatusCode::INTERNAL_ERROR);
         }
     }
 
